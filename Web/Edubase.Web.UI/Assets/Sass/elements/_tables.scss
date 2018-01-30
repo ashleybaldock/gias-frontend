@@ -1,0 +1,722 @@
+// Tables
+// ==========================================================================
+
+$changeTableThPadding: 18px;
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+table th,
+table td {
+  @include core-14;
+  padding: 6px 10px 6px 8px;
+  color: #0b0c0c;
+  border-bottom: 1px solid $border-colour;
+  vertical-align: top;
+  &.no-border {
+      border-bottom:none;
+  }
+}
+
+tbody th {
+    text-align: left;
+}
+
+
+table tr {
+    td:first-child {
+        text-align: left;
+    }
+
+    th.first-column {
+        text-align: left;
+    }
+}
+
+table tbody tr {
+    td:first-child, th:first-child, th.first-column {
+        text-align: left;
+    }
+}
+
+
+table thead th {
+  font-weight: normal;
+  vertical-align: top;
+
+  &:first-child {
+    text-align: left;
+  }
+}
+
+table tbody .url {
+  word-break: break-all;
+}
+
+
+.borderless {
+    width: 100%;
+       
+    th, td { 
+        border : none;
+        font-size: 14px;
+    }
+    @media(min-width: 640px) {
+        width: 60%;        
+    }
+}
+
+.borderless.no-padding {
+    th, td { 
+        padding:0;
+    }
+}
+
+
+.edubase-table {
+    border-top: 1px solid $black;
+
+    &.no-pagination {
+        border-top: 0;
+
+        tbody tr:last-child {
+            td {
+                border-bottom: 0;
+            }
+        }
+    }
+
+    th {
+        font-weight: bold;
+        text-align: left;
+    }
+
+    thead {
+        td, th {
+            border-bottom: 4px $black solid;
+        }
+
+        th {
+            padding: 8px 0 8px 6px;
+        }
+    }
+    // links table
+    .links-urn {
+        width: 16%;
+    }
+
+    .links-name {
+        width: 35%;
+    }
+
+    .links-type {
+        width: 23%;
+    }
+
+    .links-date {
+        width: 16%;
+    }
+
+    @include media(mobile) {
+        thead {
+            display: none;
+        }
+
+        tr {
+            border-top: 1px solid $black;
+
+            &:first-child {
+                border: none;
+            }
+        }
+
+        td {
+            clear: left;
+            display: block;
+            float: left;
+            width: 100% !important;
+            border-bottom: $grey-3 1px solid;
+            max-width: 100%;
+            padding: 12px 0;
+
+
+            &:before {
+                content: attr(aria-label);
+                float: left;
+                font-weight: bold;
+                padding-right: 0.5em;
+            }
+
+            &:last-child {
+                border: 0;
+            }
+
+            &.fixed-width {
+                &:before {
+                    width:150px;
+                }
+            }
+        }
+    }
+}
+
+.approval-changes {
+    table-layout: fixed;
+    display: table;
+    border-top: 0;
+
+    th, td {
+        word-wrap: break-word;
+        text-align: left;
+        max-width: 11.1%;
+        overflow: hidden;
+        padding-top: 12px;
+    }
+
+    thead th {
+        padding-bottom: 0;
+        padding-top: 18px;
+
+        &.multi-line {
+            padding-top: 8px;
+        }
+
+        a {
+            padding-bottom: 8px;
+        }
+    }
+
+    thead .cell-checkbox {
+        height: auto;
+    }
+
+    .cell-checkbox {
+        height: 52px;
+        position: relative;
+
+
+
+        .edubase-button-checkbox {
+            padding: 0;
+        }
+
+        @include media(desktop) {
+            width: 28px;
+        }
+
+        @media(max-width: 940px) {
+            &:after {
+                content: attr(aria-label);
+                position: relative;
+                top: 14px;
+                left: 44px;
+            }
+
+            &:before {
+                content: "";
+            }
+        }
+    }
+
+    .cell-urn {
+        @include media(desktop) {
+            width: 40px;
+        }
+    }
+
+    .cell-estab {
+        @include media(desktop) {
+            width: 80px;
+        }
+    }
+
+    .cell-updatedfield {
+        @include media(desktop) {
+            width: 80px;
+        }
+    }
+
+    .cell-oldvalue {
+        @include media(desktop) {
+            width: 80px;
+        }
+    }
+
+    .cell-newvalue {
+        @include media(desktop) {
+            width: 80px;
+        }
+    }
+
+    .cell-edate {
+        @include media(desktop) {
+            width: 58px;
+        }
+    }
+
+    .cell-rdate {
+        @include media(desktop) {
+            width: 58px;
+        }
+    }
+
+    .cell-suggested {
+        @include media(desktop) {
+            width: 63px;
+        }
+    }
+}
+
+
+.list-table {
+    border-top: 0;
+    
+    tr:last-child {
+        td {
+            border-bottom: 0;
+        }
+    }
+}
+@media(max-width: 940px) {
+    .changes-list-wrapper {
+        border-top: 2px $black solid;    
+    }
+    .approval-changes {
+        thead {
+            display: none;
+        }
+
+        tr {
+            border-top: 1px solid $black;
+             &:first-child {
+                border: none;
+            }
+        }
+
+        td {
+            clear: left;
+            display: block;
+            float: left;
+            width: 100% !important;
+            border-bottom: $grey-3 1px solid;
+            max-width: 100%;
+            padding: 12px 0;
+
+
+            &:before {
+                content: attr(aria-label);
+                float: left;
+                font-weight: bold;
+                padding-right: 0.5em;
+            }
+
+            &:last-child {
+                border: 0;
+            }
+        }
+    }
+}
+
+.retain-columns { 
+    // only suitable for tables with 2 columns as the header does not hide at mobile
+    // used on data status
+     @include media(mobile) {
+         thead {
+           display: table-header-group;
+           th:first-child {
+               width: 75%;
+           }
+        }
+
+         tr {
+            border-top: 1px solid $black;
+             &:first-child {
+                border: none;
+            }
+        }
+
+        td {
+            display: table-cell;
+            float: none;
+            padding-left: 6px;
+            width: auto !important;
+           
+            &:before {
+                content: "";
+                display: none;
+                
+            }
+
+            &:last-child {
+                border-bottom: $grey-3 1px solid;
+            }
+        }
+    }
+}
+
+.changes-summary {
+    tbody tr:last-child {
+        td {
+            border-bottom: 4px solid $black;
+        }
+    }
+}
+
+
+
+.table-count {
+    
+    margin-bottom: 12px;
+
+    p {
+        margin: 0 0 12px;
+        padding: 0;
+        font-size: 16px;
+    }
+}
+
+
+p.table-caption {
+    width: 66%;
+    margin: 20px 0;
+    font-size: 16px;
+    @include media(mobile) {
+        width: 100%;
+    }
+
+    + .date-group {
+        margin: 30px 0;
+    }
+}
+
+
+.edit-cell {
+    text-align: right;
+}
+
+.download-id {
+    width: 40px;
+}
+
+.table-footnote {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.data-description {
+    font-size: 16px;
+    @include media(tablet){
+        width: 75%;
+    }
+}
+
+
+.no-bottom-margin {
+    margin-bottom: 0;
+}
+
+.helpdesk-table {
+    thead th {
+        font-weight: bold;
+    }
+
+    .row-header {
+        width: 36%;
+    }
+}
+
+.establishment-changes {
+    thead th {
+        padding-top: 0;
+    }
+}
+
+.change-history {
+    table-layout: fixed;
+
+    .key-value-list {
+        margin-bottom: 0;
+
+        dt {
+            font-weight: bold;
+            margin-right: 4px;
+            margin-top: 1px;
+
+            &:after {
+                content: ":";
+            }
+        }
+
+        dd {
+            word-wrap: break-word;
+        }
+    }
+
+    .cell-edate {
+        width: 11%;
+        padding-top: $changeTableThPadding;
+    }
+
+    .cell-requesttype {
+        width: 11%;
+        padding-top: $changeTableThPadding;
+    }
+
+    .cell-urn {
+        width: 7%;
+    }
+
+    .cell-estab {
+        width: 17%;
+        padding-top: $changeTableThPadding;
+    }
+
+    .cell-change {
+        width: 44%;
+        padding-top: $changeTableThPadding;
+    }
+
+    .cell-suggested {
+        width: 12%;
+        padding-top: $changeTableThPadding;
+    }
+
+    &.establishment-changes .cell-urn {
+        padding-top: $changeTableThPadding;
+    }
+
+    .cell-updatedfield,
+    .cell-oldvalue,
+    .cell-newvalue,
+    .cell-suggested {
+        padding-top: $changeTableThPadding;
+    }
+
+    tbody td {
+        word-wrap: break-word;
+    }
+
+    .single-line .selected-sort.sorted-asc::after {
+        top: 65%;
+    }
+}
+
+// sortable tables
+
+
+.sortable-table {
+    thead a {
+        text-decoration: none;
+        font-weight: normal;
+        display: block;
+        float: left;
+
+        &:focus, &:active {
+            background-color: transparent;
+            outline: 0;
+        }
+
+        &:visited {
+            color: $govuk-blue;
+        }
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .cell-requesttype {
+        padding-right: 4px;
+        width: 13%;
+        a {
+            display: block;
+            max-width: 80%;
+        }
+    }
+
+    .selected-sort {
+        font-weight: bold;
+        position: relative;
+        padding-right: 14px;
+        padding-bottom: 8px;
+
+
+        &.sorted-asc:after {
+            width: 0;
+            height: 0;
+            position: absolute;
+            content: '';
+            right: 0;
+            top: 50%;
+            margin-top: -8px;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 7px solid $govuk-blue;
+        }
+
+        &.sorted-desc:after {
+            width: 0;
+            height: 0;
+            position: absolute;
+            content: '';
+            right: 0;
+            top: 50%;
+            margin-top: -8px;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 7px solid $govuk-blue;
+        }
+
+        .multi-line & {
+            padding-right: 6px;
+        }
+    }
+}
+
+.list-table.sortable-table {
+    .selected-sort {
+        padding-bottom: 4px;
+
+        &:after {
+            margin-top: -5px;
+        }
+    }
+}
+
+.unsortable {
+    thead a {
+        color: $black;
+
+        &:focus, &:active {
+            background-color: transparent;
+            outline: 0;
+        }
+
+        &:visited {
+            color: $black;
+        }
+
+        &:hover {
+            color: $black;
+            text-decoration: none;
+        }
+    }
+}
+
+table.change-history {
+    margin-bottom: 20px;
+}
+
+.expanding-table {
+    .not-a-link {
+        display: block;
+        padding-top: 12px;
+    }
+
+    thead th {
+        padding-top: 8px;
+
+        a {
+            padding-top: 12px;
+
+            &:after {
+                //top: 65% !important;
+            }
+        }
+
+        &.cell-edate {
+            width: 13%;
+        }
+    }
+
+    .multi-line {
+        a {
+            padding-top: 0;
+        }
+
+        .selected-sort {
+            &:after {
+                //top: 76%;
+            }
+        }
+    }
+
+    .cell-suggested {
+        width:14%;
+        a {
+            display: block;
+            max-width: 77%;
+        }
+    }
+}
+
+table.expanded-table {
+    thead th {
+        a.selected-sort.sorted-asc::after,
+        a.selected-sort.sorted-desc::after {
+            margin-top: 0;
+        }
+    }
+
+    thead th.cell-estab {
+        a.sorted-asc.selected-sort:after {
+            margin-top: -8px;
+        }
+    }
+}
+
+.multi-estab-changes {
+    .cell-oldvalue, .cell-newvalue {
+        width: 9.5%;
+    }
+
+    .cell-suggested {
+        width: 13%;
+    }
+
+    .cell-urn {
+        width: 8%;
+
+        .selected-sort:after {
+            right: 1px;
+        }
+    }
+
+    .cell-estab {
+        .selected-sort:after {
+            right: 2px;
+        }
+        
+        .sorted-desc.selected-sort:after {
+            margin-top: 0;
+        }
+    }
+
+    thead th {
+        padding-right: 3px;
+
+        a {
+            max-width: 95%;
+            display: block;
+        }
+    }
+}
+
+.group-change-history {
+    .cell-edate {
+        padding-right: 4px;
+    }
+    .cell-suggested {
+        width: 16%;
+    }
+}
+
+.establishment-changes {
+    thead .cell-updatedfield a {
+        display: block;
+        max-width: 75%;
+    }
+}

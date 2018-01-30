@@ -1,0 +1,57 @@
+﻿@using Edubase.Web.UI.Models
+@model HomepageViewModel
+@{
+    ViewBag.Title = "Get information about schools";
+}
+
+<div class="grid-row">
+    <div class="column-full">
+        <h1 class="heading-intro">Home page</h1>
+    </div>
+</div>
+
+<div class="grid-row">
+    <div class="column-half">
+        <h2 class="heading-medium">Search</h2>
+        <ul>
+            <li>@Html.ActionLink("Search", "Index", "Search")</li>
+        </ul>
+
+        <h2 class="heading-medium">Downloads</h2>
+        <ul>
+            <li>@Html.ActionLink("Download all school data", "Index", "Downloads")</li>
+        </ul>
+
+    </div>
+
+    @if (Model.AllowApprovals || Model.AllowSchoolCreation || Model.AllowTrustCreation)
+    {
+        <div class="column-half">
+
+            @if (Model.AllowApprovals)
+            {
+                <h2 class="heading-medium">Approvals</h2>
+                <ul>
+                    <li>@Html.ActionLink("View my approval items" + (ViewBag.PendingApprovalItemsCount > 0 ? " (" + ViewBag.PendingApprovalItemsCount + ")" : "") as string, "Index", "Approval")</li>
+                </ul>
+            }
+
+            @if (Model.AllowSchoolCreation || Model.AllowTrustCreation)
+            {
+                <h2 class="heading-medium">Create</h2>
+                <ul>
+                    @if (Model.AllowSchoolCreation)
+                    {
+                        <li>@Html.ActionLink("Create new school", "Create", "Establishment")</li>
+                    }
+
+                    @if (Model.AllowTrustCreation)
+                    {
+                        <li>@Html.ActionLink("Create new Academy Trust", "SearchCompaniesHouse", "Group", new { area = "Groups" }, null)</li>
+                    }
+                </ul>
+            }
+
+        </div>
+    }
+</div>

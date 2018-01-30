@@ -1,0 +1,46 @@
+﻿@model ToolsViewModel
+@{
+    ViewBag.Title = "Get information about schools";
+    ViewBag.bodyClasses = "tools-landing";
+    var creationActions = Model.GetCreateActions(Html);
+    var updateActions = Model.GetUpdateActions(Html);
+}
+
+<div class="breadcrumbs">
+    <ul>
+        <li>
+            @Html.ActionLink("Home", "Index", "Search", new { area = "" }, null)
+        </li>
+    </ul>
+</div>
+
+<div class="grid-row">
+    <div class="column-full">
+        <h1 class="heading-intro">Tools</h1>
+    </div>
+</div>
+
+@RenderLinks("Create", creationActions)
+@RenderLinks("Update", updateActions, creationActions.Any())
+@RenderLinks("Administration tools", Model.GetAdminActions(Html), creationActions.Any() || updateActions.Any())
+
+@helper RenderLinks(string label, List<ToolsViewModel.LinkAction> list, bool sectionBreak = false)
+{
+    if (list.Any())
+    {
+        <div class="grid-row">
+            <div class="column-full @Html.Conditional(sectionBreak, "section-break")">
+                <h2 class="heading-medium">@label</h2>
+            </div>
+        </div>
+        <div class="grid-row">
+            @foreach (var item in list)
+            {
+                <div class="column-half">
+                    <h3>@item.Link</h3>
+                    <p>@Html.Raw(item.Description)</p>
+                </div>
+            }
+        </div>
+    }
+}

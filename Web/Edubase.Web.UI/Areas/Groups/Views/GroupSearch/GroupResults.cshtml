@@ -1,0 +1,149 @@
+﻿@using Edubase.Common;
+@using Edubase.Services.Groups.Search;
+@model GroupSearchViewModel
+@{
+    ViewBag.Title = $"Search results for '{Model.GroupSearchModel.Text}'";
+    ViewBag.PageClass = "search-results";
+    ViewBag.HideLogo = true;
+}
+
+<div class="grid-row">
+    <div class="column-full results-heading">
+        <div class="breadcrumbs">
+            @Html.ActionLink("Back to find an establishment group", "Index",  new { controller="Search", area = "", SelectedTab = "Groups" })
+        </div>
+        <h1 class="heading-xlarge">Search results</h1>
+        <a class="download-link" href="@Url.Action("PrepareDownload", "GroupSearch")?@Url.CurrentQueryString()">Download these search results</a>
+
+    </div>
+    @if (!Model.GroupSearchModel.Text.IsNullOrEmpty())
+            {
+        <div class="column-full">
+            <p>Establishment groups matching &lsquo;<span class="bold-small">@Model.GroupSearchModel.Text</span>&rsquo;.</p>
+        </div>
+    }
+</div>
+
+<div class="grid-row">
+
+    <div class="column-third">
+        <div class="filter-form" id="filter-form">
+
+            <div id="EditSearchCollapse" aria-expanded="true" class="blanket-container">                
+                <form method="get" action="@Url.Action("Index", "GroupSearch", new { area = "Groups" })">
+
+                    <div class="govuk-option-select js-collapsible"
+                         id="option-select-sort-by">
+                        <div class="container-head js-container-head">
+                            <div class="option-select-label">Sort by</div>
+                        </div>
+                        <select class="form-control trigger-result-update" name="SortBy">
+                            <option value="a" @Html.Conditional(Model.SortOption == Edubase.Services.Enums.eSortBy.NameAlphabeticalAZ , "selected")>Alphabetical A-Z</option>
+                            <option value="z" @Html.Conditional(Model.SortOption == Edubase.Services.Enums.eSortBy.NameAlphabeticalZA, "selected")>Alphabetical Z-A</option>
+                        </select>
+                    </div>
+
+                    <div class="govuk-option-select js-collapsible"
+                         id="option-select-group-type">
+                        <div class="container-head js-container-head">
+                            <div class="option-select-label">Group type</div>
+                            <div class="js-selected-counter">
+                                <span class="js-selected-counter-text"></span>                
+                            </div>
+                        </div>
+                        @*<a href="#" class="clear-selections filter-clear">Clear</a>*@
+                        <div class="options-container">
+                            <div class="js-auto-height-inner">
+                                <fieldset>
+                                    <legend class="visuallyhidden">Select an option below to filter the results</legend>
+                                    <div class="filter-wrapper select-all-wrap">
+                                        <input id="grouptype_all" class="filter-input select-all" type="checkbox" />
+                                        <label for="grouptype_all" class="filter-radio">
+                                            All
+                                        </label>
+                                    </div>
+                                    @foreach (var item in Model.GroupTypes)
+                                    {
+                                        <div class="filter-wrapper">
+                                            <input name="t" value="@item.Id" class="trigger-result-update filter-input" id="group-type_@item.Id" type="checkbox" @Html.Conditional(Model.SelectedGroupTypeIds.Contains(item.Id), "checked") />
+                                            <label for="group-type_@item.Id" class="filter-radio">
+                                                @item
+                                            </label>
+                                        </div>                                        
+                                    }
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="govuk-option-select js-collapsible" id="option-select-group-status">
+                            <div class="container-head js-container-head">
+                                <div class="option-select-label">Group status</div>
+                                <div class="js-selected-counter">
+                                    <span class="js-selected-counter-text"></span>                
+                                </div>
+                            </div>
+                            @*<a href="#" class="clear-selections filter-clear">Clear</a>*@
+                            <div class="options-container" id="">
+                                <div class="js-auto-height-inner">
+                                    <fieldset><span class="visuallyhidden">- changing the selection will refresh the results</span>
+                                        <legend class="visuallyhidden">Select an option below to filter the results</legend>
+                                    <div class="filter-wrapper select-all-wrap">
+                                        <input id="groupstatus_all" class="filter-input select-all" type="checkbox" />
+                                        <label for="groupstatus_all" class="filter-radio">
+                                            All
+                                        </label>
+                                    </div>
+                                        @foreach (var item in Model.GroupStatuses)
+                                        {
+                                            <div class="filter-wrapper">
+                                                <input name="s" value="@item.Id" class="trigger-result-update filter-input" id="group-status_@item.Id" type="checkbox" @Html.Conditional(Model.SelectedGroupStatusIds.Contains(item.Id), "checked") />
+                                                <label for="group-status_@item.Id" class="filter-radio">
+                                                    @item
+                                                </label>
+                                            </div>
+                                        }                                            
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div id="filter-addtional-controls">
+                        <a href="#" class="add-clear-filters" id="clear-filters">Clear all filters</a>                        
+                    </div>
+                    <input type="submit" value="Update" class="button edubase-filter-submit" id="filter-submit" />
+                    @Html.HiddenFor(!Model.GroupSearchModel.Text.IsEmpty(), x => x.GroupSearchModel.Text)
+                    @Html.HiddenFor(!Model.GroupSearchModel.AutoSuggestValue.IsEmpty(), x => x.GroupSearchModel.AutoSuggestValue)
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="column-two-thirds" id="results-container">
+
+        @{Html.RenderPartial("Partials/_GroupSearchResults");}
+
+    </div>
+
+</div>
+
+@section ViewScripts
+{
+    <script language="javascript">
+        var $openSelector = $("#group-status_1");
+        var $openClosedSelector = $("#group-status_4");
+
+        $($openSelector).change(function () {
+            if (this.checked) {
+                $openClosedSelector.prop('checked', true);
+            }
+        });
+        
+        DfE.searchResults.init();
+    
+    
+    </script>
+}

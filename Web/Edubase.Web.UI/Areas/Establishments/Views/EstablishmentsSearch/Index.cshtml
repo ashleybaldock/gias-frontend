@@ -1,0 +1,450 @@
+﻿@using Edubase.Web.UI.Models.Search
+@using Edubase.Web.UI.Helpers
+@using Edubase.Common
+@using Edubase.Services.Enums
+@using M = Edubase.Web.UI.Areas.Establishments.Models.Search.EstablishmentSearchViewModel;
+@model M
+@{
+    ViewBag.Title = $"Search results for '{Model.TextSearchModel.Text}'";
+    ViewBag.PageClass = "search-results";
+    ViewBag.HideLogo = true;
+}
+
+<div class="grid-row" id="search-results">
+    <div class="column-full results-heading">
+        <div class="breadcrumbs">            
+            <a href="@Url.Action("Index", "Search", new {area = "", SelectedTab = "Establishments", SearchType = Model.SearchType})">Back to find an establishment</a>
+        </div>
+
+        <h1 class="heading-xlarge">Search results</h1>
+        @if (Model.Count > 0)
+        {
+            <a class="download-link" href="@Url.Action("PrepareDownload", "EstablishmentsSearch", new {area = "Establishments"})?@Url.CurrentQueryString()">Download these search results</a>
+        }
+    </div>
+    <div class="column-full">
+        <p>
+            @if (Model.SearchType == eSearchType.Text)
+            {
+                if (Model.TextSearchType == M.eTextSearchType.EstablishmentName || 
+                    Model.TextSearchType == M.eTextSearchType.Unknown)
+                {
+                    if (!Model.TextSearchModel.Text.IsEmpty())
+                    {
+                        <text>Establishments matching &lsquo;<span class="bold-small">@Model.TextSearchModel.Text</span>&rsquo;</text>
+                    }
+                }
+                else if (Model.TextSearchType == M.eTextSearchType.LAESTAB)
+                {
+                    <text>Establishments matching the LAESTAB "@Model.TextSearchModel.Text".</text>
+                }
+                else if (Model.TextSearchType == M.eTextSearchType.UKPRN)
+                {
+                    <text>Establishments matching the <abbr title="UK Provider Reference Number">UKPRN</abbr> "@Model.TextSearchModel.Text".</text>
+                }
+                else if (Model.TextSearchType == M.eTextSearchType.URN)
+                {
+                    <text>Establishments matching the <abbr title="Unique Reference Number">URN</abbr> "@Model.TextSearchModel.Text".</text>
+                }
+            }
+            else if (Model.SearchType == eSearchType.ByLocalAuthority)
+            {
+                <text>Establishments in <span id="la-list">the selected local authorities</span></text>
+            }
+            else if (Model.SearchType == eSearchType.Location)
+            {
+                var displayLocation = Model.LocationSearchModel.Text;
+                var lastIndex = displayLocation.LastIndexOf(",");
+                if (lastIndex > -1)
+                {
+                    displayLocation = displayLocation.Substring(0, lastIndex);
+                }
+                <text>Establishments matching &lsquo;</text><span class="bold-small">@displayLocation</span><text>&rsquo;</text>
+            }
+    </p>
+    </div>
+    <div class="column-full">
+        <div class="error-summary hidden" id="js-filter-error-summary">
+            <h2 class="error-summary-heading heading-medium">There was a problem with your filter options</h2>
+            <ul class="error-summary-list">
+                <li class="summary-date-error error-message hidden">Please enter the date in the format DD/MM/YYYY</li>
+                <li class="summary-range-error error-message hidden">Please enter the age in the correct format, for example 5 to 11</li>
+                <li class="summary-radius-error error-message hidden">Please enter a radius between 0 and 99.99</li>
+            </ul>
+        </div>
+        <div class="date-filter-warning warning-message @Html.Conditional(!Model.ShowDateFilterWarning, "hidden")">
+            <p>Incomplete historical data means a number of records have no open date recorded and do not appear in this search.</p>
+        </div>
+    </div>
+</div>
+
+
+<div class="grid-row">
+    <form method="get" action="@Url.Action("Index", "EstablishmentsSearch", new {area = ""})">
+        <input type="hidden" id="client-only-searchtype" value="@Model.SearchType" />
+        <div class="filter-form" id="filter-form">
+            <div class="column-third">
+
+
+                <div id="EditSearchCollapse" class="blanket-container">
+
+                    @if (Model.SearchType == eSearchType.Location)
+                    {
+                        @RadiusFilter()
+                    }
+
+
+
+                    @SelectorNested("Establishment type", M.BIND_ALIAS_TYPEIDS, Model.EstablishmentTypes.OrderBy(e => e.Name), Model.SelectedEstablishmentTypeIds)
+
+                    @Selector("Status", M.BIND_ALIAS_STATUSIDS, Model.EstablishmentStatuses.OrderBy(x => x.Name), Model.SelectedEstablishmentStatusIds)
+
+                    @Selector("Phase of education", M.BIND_ALIAS_PHASEIDS, Model.EducationPhases.OrderBy(x => x.Name), Model.SelectedEducationPhaseIds)
+
+                    @Selector("Local authority", M.BIND_ALIAS_LAIDS, Model.LocalAuthorities.OrderBy(x => x.Name), Model.SelectedLocalAuthorityIds, filterRefine: true)
+
+
+
+                    @Selector("Religious character", M.BIND_ALIAS_RELICHARIDS, Model.ReligiousCharacters.OrderBy(x => x.Name), Model.SelectedReligiousCharacterIds, filterRefine: true)
+
+
+                    <!-- begin opted in filters -->
+                    @OpenDateFilter()
+
+                    @CloseDateFilter()
+
+                    @Html.EditorFor(x => x.AgeRangeLow, new {title = "Age range low", id = "age-range-low-filter", bindalias = M.BIND_ALIAS_AGE_RANGE_LOW_FROM})
+
+                    @Html.EditorFor(x => x.AgeRangeHigh, new {title = "Age range high", id = "age-range-high-filter", bindalias = M.BIND_ALIAS_AGE_RANGE_HIGH_FROM})
+
+                    @Selector("Admissions policy", M.BIND_ALIAS_ADMPOL, Model.AdmissionsPolicies.OrderBy(x => x.Name), Model.SelectedAdmissionsPolicyIds, "additional-search-critera hidden", true)
+
+                    @Selector("Boarding provision", M.BIND_ALIAS_BOARDPOL, Model.BoardingProvisions.OrderBy(x => x.Name), Model.SelectedBoardingProvisionIds, "additional-search-critera hidden", true)
+
+
+                    @Selector("Diocese", M.BIND_ALIAS_DIOCESE, Model.Dioceses.OrderBy(x => x.Name), Model.SelectedDioceseIds, "additional-search-critera hidden", true, true)
+
+                    @Selector("District", M.BIND_ALIAS_DISTRICT, Model.Districts.OrderBy(x => x.Name), Model.SelectedDistrictIds, "additional-search-critera hidden", true, true)
+
+                    @Selector("Further Education type", M.BIND_ALIAS_FETYPE, Model.FurtherEducationTypes.OrderBy(x => x.Name), Model.SelectedFETypeIds, "additional-search-critera hidden", true)
+
+                    @Selector("Gender of entry", M.BIND_ALIAS_GENDER, Model.Genders.OrderBy(x => x.Name), Model.SelectedGenderIds, "additional-search-critera hidden", true)
+
+                    @Selector("Government Office Region", M.BIND_ALIAS_GOR, Model.GORs.OrderBy(x => x.Name), Model.SelectedGORIds, "additional-search-critera hidden", true)
+
+
+                    @Selector("Nursery provision", M.BIND_ALIAS_NURSERY, Model.NurseryProvisions.OrderBy(x => x.Name), Model.SelectedNurseryProvisionIds, "additional-search-critera hidden", true)
+
+                    @Selector("Ofsted rating", M.BIND_ALIAS_OFSTEDRATINGS, Model.OfstedRatings.OrderBy(x => x.Name), Model.SelectedOfstedRatingIds, "additional-search-critera hidden", true)
+
+                    @Selector("Parliamentary constituency", M.BIND_ALIAS_PARLCONST, Model.ParliamentaryConstituencies.OrderBy(x => x.Name), Model.SelectedParliamentaryConstituencyIds, "additional-search-critera hidden", true, true)
+
+                    @Selector("Religious ethos", M.BIND_ALIAS_RELETHOS, Model.ReligiousEthoses.OrderBy(x => x.Name), Model.SelectedReligiousEthosIds, "additional-search-critera hidden", true, true)
+
+                    @Selector("RSC region", M.BIND_ALIAS_RSCREG, Model.RSCRegions.OrderBy(x => x.Name), Model.SelectedRSCRegionIds, "additional-search-critera hidden", true)
+
+                    @Selector("Section 41 approved", M.BIND_ALIAS_SECT41, Model.Section41Designations.OrderBy(x => x.Name), Model.SelectedSection41Ids, "additional-search-critera hidden", true)
+
+                    @Selector("Sixth form provision", M.BIND_ALIAS_SIXTHFORM, Model.SixthFormProvisions.OrderBy(x => x.Name), Model.SelectedSixthFormProvisionIds, "additional-search-critera hidden", true)
+
+                    @Selector("Special classes", M.BIND_ALIAS_SPECLASS, Model.SpecialClassesProvisions.OrderBy(x => x.Name), Model.SelectedSpecialClassesProvisionIds, "additional-search-critera hidden", true)
+
+                    @Selector("Type of SEN provision", M.BIND_ALIAS_TYPEOFSENPRV, Model.TypeOfSENProvisions.OrderBy(x => x.Name), Model.SelectedTypeOfSENProvisionIds, "additional-search-critera hidden", true)
+
+                    @Selector("Urban/Rural description", M.BIND_ALIAS_URBRUR, Model.UrbanRuralDesignations.OrderBy(x => x.Name), Model.SelectedUrbanRuralIds, "additional-search-critera hidden", true)
+
+                    <div id="filter-addtional-controls">
+                        <a href="#" class="add-clear-filters" id="clear-filters">Clear all filters</a>
+                        <a href="#" class="add-filters-link add-clear-filters">Add/remove filters</a>
+                    </div>
+
+
+                    <input type="submit" value="Update" class="button edubase-filter-submit" id="filter-submit"/>
+
+                    @if (Model.SearchType == eSearchType.Text)
+                    {
+                        @Html.HiddenFor(!Model.TextSearchModel.Text.IsEmpty(), x => x.TextSearchModel.Text)
+                        @Html.HiddenFor(!Model.TextSearchModel.AutoSuggestValue.IsEmpty(), x => x.TextSearchModel.AutoSuggestValue)
+                    }
+                    else if (Model.SearchType == eSearchType.Location)
+                    {
+                        @Html.HiddenFor(!Model.LocationSearchModel.Text.IsEmpty(), x => x.LocationSearchModel.Text)
+                        @Html.HiddenFor(!Model.LocationSearchModel.Text.IsEmpty(), x => x.LocationSearchModel.AutoSuggestValue)
+                    }
+
+                    <input type="hidden" id="selected-search-filters" name="@M.BIND_ALIAS_SELECTED_SEARCH_FILTERS" value="@Model.SelectedExtraSearchFilters"/>
+
+                    @Html.HiddenFor(x => x.SearchType)
+
+
+
+                </div>
+
+                <div id="additional-filter-wrap" class="hidden">
+                    <div class="searchable-filters govuk-option-select additional-filters" data-closed-on-load="false" id="option-select-additional-filters">
+                        <div class="container-head js-container-head">
+                            <div class="option-select-label">Add/remove filters</div>
+                            <div class="js-selected-counter">
+                                <span class="js-selected-counter-text"></span>
+                            </div>
+                        </div>
+                        <a href="#" class="clear-selections filter-clear">Clear</a>
+                        @SearchWithin()
+                        <div class="options-container" id="">
+                            <div class="js-auto-height-inner">
+                                <div class="suggestion-target"></div>
+                                <fieldset id="filter-type-target"></fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input value="Add/remove" class="button " id="filter-refine" type="submit">
+                    <button class="button button-grey " id="add-filter-cancel">Cancel</button>
+                </div>
+
+            </div>
+
+            <div class="column-two-thirds" id="results-container">
+
+                @{Html.RenderPartial("Partials/_EstablishmentSearchResults");}
+
+            </div>
+            @{Html.RenderPartial("Partials/_EstablishmentSearchMap");}
+        </div>
+    </form>
+</div>
+
+@helper SearchWithin()
+{
+    <div class="search-field-wrap">
+        <label class="filter-searchwithin-label">
+            <span class="visually-hidden">Search within this filter</span>
+            <input type="text" class="filter-search" />
+            <button class="field-clear hidden"><span class="visually-hidden">Clear</span></button>
+        </label>        
+    </div>
+}
+
+@helper Selector(string label, string name, IEnumerable<LookupItemViewModel> items, List<int> selectedItems, string additionalClassName = "", bool isExtraFilter = false, bool filterRefine = false)
+{
+    var closed = isExtraFilter && (Model.SelectedExtraSearchFilters == null || !Model.SelectedExtraSearchFilters.Contains(name));
+    if (!closed)
+    {
+        additionalClassName = additionalClassName.RemoveSubstring("hidden");
+    }
+    <div class="govuk-option-select js-collapsible @additionalClassName @Html.Conditional(filterRefine, "searchable-filters")" data-closed-on-load="@(isExtraFilter ? "false" : "true")"
+         id="option-select-@label.ToLower().Replace(" ", "-").Replace("/","-")" data-bind-alias="@name">
+        <div class="container-head js-container-head">
+            <div class="option-select-label">@label</div>
+            <div class="js-selected-counter">
+                <span class="js-selected-counter-text"></span>
+                
+            </div>
+        </div>
+        @*<a href="#" class="clear-selections filter-clear">Clear</a>*@
+    @if (filterRefine)
+    {
+        @SearchWithin()
+    }
+        <div class="options-container" id="">
+            <div class="suggestion-target"></div>
+            <div class="js-auto-height-inner">
+                <fieldset>
+                    <legend class="visuallyhidden">Select an option below to filter the results- changing the selection will refresh the results</legend>
+                    <div class="filter-wrapper select-all-wrap">
+                        <input id="@(name)_all" class="filter-input select-all" type="checkbox" />
+                        <label for="@(name)_all" class="filter-radio">
+                            All
+                        </label>
+                    </div>
+                    @foreach (var item in items)
+                    {
+                        <div class="filter-wrapper">
+                            <input name="@name" value="@item.Id" id="@(name)_@item.Id" class="trigger-result-update filter-input" type="checkbox" @Html.Conditional(selectedItems.Contains(item.Id), "checked")/>
+                            <label for="@(name)_@item.Id" class="filter-radio">
+                                @item
+                            </label>
+                        </div>
+                    }
+                </fieldset>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@helper SelectorNested(string label, string name, IEnumerable<HeirarchicalLookupItemViewModel> items, List<int> selectedItems, string additionalClassName = "", bool isExtraFilter = false,  bool filterRefine = false)
+{
+    var closed = isExtraFilter && (Model.SelectedExtraSearchFilters == null || !Model.SelectedExtraSearchFilters.Contains(name));
+    if (!closed)
+    {
+        additionalClassName = additionalClassName.RemoveSubstring("hidden");
+    }
+    <div class="govuk-option-select js-collapsible nested-filter-options @additionalClassName @Html.Conditional(filterRefine, "searchable-filters")" data-closed-on-load="false" @*@(isExtraFilter ? "false" : "true")*@
+         id="option-select-@label.ToLower().Replace(" ", "-").Replace("/","-")" data-bind-alias="@name">
+        <div class="container-head js-container-head">
+            <div class="option-select-label">@label</div>
+            <div class="js-selected-counter">
+                <span class="js-selected-counter-text"></span>                
+            </div>
+        </div>
+        @*<a href="#" class="clear-selections filter-clear">Clear</a>*@
+        @if (filterRefine)
+        {
+           @SearchWithin()
+        }
+        <div class="options-container">            
+            <div class="suggestion-target"></div>
+            <div class="js-auto-height-inner">
+                <fieldset>
+                    <legend class="visuallyhidden">Select an option below to filter the results- changing the selection will refresh the results</legend>
+                    <div class="filter-wrapper select-all-wrap">
+                        <input id="@(name)_all" class="filter-input select-all" type="checkbox" />
+                        <label for="@(name)_all" class="filter-radio">
+                            All
+                        </label>
+                    </div>
+                    @foreach (var item in items)
+                    {
+                        <dl class="nested-items">
+                            <dt>
+                                <input id="@(name)_@item.Id" class="filter-group-title  filter-input" type="checkbox" @Html.Conditional(selectedItems.Contains(item.Id), "checked")/>
+                                <label for="@(name)_@item.Id" class="filter-radio">
+                                    @item
+                                    <a href="#" class="child-option-toggle"></a>
+                                </label>
+                            </dt>
+                            <dd class="filter-group">
+                                @foreach (var child in item.ChildItems)
+                                {
+                                    <div class="filter-wrapper">
+                                        <input name="@name" value="@child.Id" id="@(name)_@(item.Id)_@child.Id" class="trigger-result-update filter-input" type="checkbox" @Html.Conditional(selectedItems.Contains(child.Id), "checked")/>
+                                        <label for="@(name)_@(item.Id)_@child.Id" class="filter-radio">
+                                            @child
+                                        </label>
+                                    </div>
+                                }
+                            </dd>
+                        </dl>
+                    }
+                </fieldset>
+            </div>
+        </div>
+    </div>
+}
+
+@helper CloseDateFilter()
+{
+
+    <div class="govuk-option-select js-collapsible date-filters no-scroll additional-search-critera hidden" data-closed-on-load="false" id="close-date-filter" data-bind-alias="@M.BIND_ALIAS_CLOSE_DATE_FROM">
+        <div class="container-head js-container-head">
+            <div class="option-select-label">Close date</div>            
+            <div class="js-selected-counter">
+                <span class="js-selected-counter-text">Date applied</span>
+            </div>
+        </div>        
+        <a href="#" class="clear-selections filter-clear">Clear</a>
+        <div class="options-container" id="">
+            <div class="js-auto-height-inner">
+                @Html.EditorFor(m => m.CloseDateFrom, new { disableHint = true, labelClass= "form-label" , title="From", inFilters = true, fieldsetClassName = "search-from-date" })
+                @Html.EditorFor(m => m.CloseDateTo, new { disableHint = true, labelClass = "form-label", title = "To", fieldSetClassName = "search-to-date" })
+                
+                <div class="form-group">
+                    <a href="#" class="button button-grey filter-button">Apply</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@helper OpenDateFilter()
+{
+
+    <div class="govuk-option-select js-collapsible date-filters no-scroll additional-search-critera hidden" data-closed-on-load="false" id="open-date-filter" data-bind-alias="@M.BIND_ALIAS_OPEN_DATE_FROM">
+        <div class="container-head js-container-head">
+            <div class="option-select-label">Open date</div>            
+            <div class="js-selected-counter">
+                <span class="js-selected-counter-text">Date applied</span>
+            </div>
+        </div>        
+        <a href="#" class="clear-selections filter-clear">Clear</a>
+        <div class="options-container" id="">
+            <div class="js-auto-height-inner">
+                
+                @Html.EditorFor(m => m.OpenDateFrom, new {disableHint = true, labelClass = "form-label", title = "From", inFilters = true, fieldsetClassName = "search-from-date" })
+                @Html.EditorFor(m => m.OpenDateTo, new {disableHint = true, labelClass = "form-label", title = "To", fieldsetClassName = "search-to-date" })
+
+                <div class="form-group">
+                    <a href="#" class="button button-grey filter-button">Apply</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@helper RadiusSelector(string label)
+{   
+    <div class="govuk-option-select js-collapsible"
+            id="option-select-@label.ToLower().Replace(" ", "-")">
+        <div class="container-head js-container-head">
+            <div class="option-select-label">@label</div>
+            <div class="js-selected-counter"></div>
+        </div>
+        <select class="form-control trigger-result-update" name="@M.BIND_ALIAS_RADIUS">
+            @foreach (var value in Model.GetRadiusOptions())
+            {
+                <option value="@value" @Html.Conditional(Model.GetRadiusOption() == value, "selected")>@value mile@(Html.Conditional(value != 1, "s"))</option>
+            }
+        </select>
+    </div>
+    
+}
+
+@helper RadiusFilter() {
+
+    <div class="govuk-option-select radius-filter js-collapsible no-scroll" data-closed-on-load="false" id="option-select-radius" data-bind-alias="@M.BIND_ALIAS_RADIUS">
+
+        <div class="container-head js-container-head">
+            <div class="option-select-label">Within radius of</div>
+            <div class="js-selected-counter"></div>
+        </div>
+        <div class="options-container" id="">
+            <div class="js-auto-height-inner">
+                <div class="form-group">
+                    <fieldset class="range-group">
+                        <span class="error-message hidden">Please check the radius you have entered</span>
+                        <span class="inline-form-control">
+                            <input type="text" id="RadiusInMiles" name="@M.BIND_ALIAS_RADIUS" value="@Model.GetRadiusOption()" class="form-control" maxlength="5" />
+                            &nbsp;miles
+                        </span>
+                        <a href="#" class="button button-grey filter-button">Apply</a>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+@section ViewScripts
+{
+    <script src="/public/assets/scripts/leaflet-bundle.js"></script>
+    <script src="/public/assets/scripts/standalone/search-map.js"></script>
+    <script language="javascript">
+        var $openSelector = $("#b_1");
+        var $openClosedSelector = $("#b_4");
+
+        $($openSelector).change(function() {
+            if (this.checked) {
+                $openClosedSelector.prop('checked', true);
+            }
+        });
+    
+        DfE.searchResults.init();
+        $('#filter-form').find('.searchable-filters').searchWithinFilters();       
+    </script>
+    
+}

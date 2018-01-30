@@ -1,0 +1,34 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    var isPartialView = ((bool?)ViewBag.IsPartialView).GetValueOrDefault();
+    Layout = isPartialView ? null as string : "../dfe/layouts/template.cshtml";
+    ViewBag.Title = "Get information about schools";
+    ViewBag.pageDescription = "";
+    ViewBag.pageClass = "error-page";
+}
+
+<div class="grid-row">
+    <div class="column-full">
+        @if (!isPartialView)
+        {
+            <div class="breadcrumbs">
+                <ul>
+                    <li>
+                        @Html.ActionLink("Home", "Index", "Search", new { area = "" }, null)
+                    </li>
+                </ul>
+
+            </div>
+        }
+        <h1 class="heading-xlarge">Sorry, something went wrong</h1>
+    </div>
+    <div class="column-two-thirds">
+        <p>Please try again later.</p>
+        <p>A report of the error has been sent to our technical team.</p>
+        @if (ViewBag.ErrorCode != null)
+        {
+            <p style="color:#ddd;">Error code: @ViewBag.ErrorCode</p>
+        }
+    </div>
+</div>

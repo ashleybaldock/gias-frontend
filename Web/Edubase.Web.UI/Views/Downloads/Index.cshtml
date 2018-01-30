@@ -1,0 +1,120 @@
+﻿@using Edubase.Services.Downloads.Models;
+@model DownloadsViewModel
+@{
+    ViewBag.Title = "Downloads";
+    ViewBag.HideLogo = true;
+    var downloadGroups = Model.GetFileDownloadGroups();
+}
+
+<div class="grid-row">
+    <div class="column-full">
+        <div class="breadcrumbs">
+            <ul>
+                <li>
+                    @Html.ActionLink("Home", "Index", "Search", new { area = "" }, null)
+                </li>                
+            </ul>
+
+        </div>
+        <h1 class="heading-xlarge">Downloads</h1>
+    </div>
+    <div class="column-two-thirds">
+        <p class="@(Model.AreScheduledExtractsAvailable ? "": "no-bottom-margin")">This data is updated daily. You can download any information you search for.</p>
+    </div>   
+</div>
+
+<div class="grid-row">
+    <div class="column-full">
+        <div class="horizontal-tabs-wrapper">
+            @if (Model.AreScheduledExtractsAvailable)
+            {
+                <div class="tab-wrap">
+                    <ul class="horizontal-tabs">
+                        <li>
+                            <a href="#group-data" class="horizontal-tab">
+                                Establishment &amp; group data
+                            </a>
+                        </li>                   
+                        <li>
+                            <a href="#scheduled-extracts" class="horizontal-tab">
+                                Scheduled extracts
+                            </a>
+                        </li>                                        
+                    </ul>
+                </div>
+            }
+            <div class="tab-content-wrapper horizontal-tabs-content">
+                <div id="group-data" class="tab-content">
+                    <div class="column-two-thirds">
+
+                        @foreach (var group in downloadGroups)
+                        {
+                            <h2 class="heading-medium">@group.Heading</h2>
+                            <p>@group.Paragraph</p>
+                            <ul class="lis">
+                                @foreach (var item in group.SubSections)
+                                {
+                                    <li style="margin-top:35px;" class="download-list-heading">@item.Heading</li>
+                                    foreach (var file in item.Files)
+                                    {
+                                        <li class="download-list-item">
+                                            <span class="icon-link-copy">
+                                                <a href="@file.Item2.Url" target="_blank" rel="nofollow" class="js-track" data-track="download-data-page|@file.Item2.Description)|download">@file.Item1, @Html.FileSizeInMegabytes(file.Item2.FileSizeInBytes)</a>
+                                            </span>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        }
+                    </div>
+                    
+                </div>
+                @if (Model.AreScheduledExtractsAvailable)
+                {
+                    <div id="scheduled-extracts" class="tab-content">
+                        
+                        <p>
+                            This is full data that can be found on Get information about schools. Not all files are date stamped, so it's a good idea to make a note of when you download the file. 
+                        </p>
+                        
+                        @if (Model.ScheduledExtracts.PageCount > 1)
+                        {
+                            <div class="top-pagination">
+                                @Html.Partial("_GenericPaginationV2", Model.ScheduledExtracts)
+                            </div>
+                        }
+
+                        <table class="edubase-table retain-columns @(Model.ScheduledExtracts.PageCount > 1 ? "" : "no-pagination")">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th class="download-id">ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var item in Model.ScheduledExtracts.Items)
+                            {
+                                <tr>
+                                    <td class="download-list-item">
+                                        @Html.RouteLink(item.Name, "RequestScheduledExtract", new {id = item.Id}, new {rel = "nofollow"})
+                                    </td>
+                                    <td>
+                                        @item.Id
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                        @if (Model.ScheduledExtracts.PageCount > 1)
+                        {
+                            <div class="lower-pagination">
+                                @Html.Partial("_GenericPaginationV2", Model.ScheduledExtracts)
+                            </div>
+                        }
+                    </div>
+                }
+                
+            </div>
+        </div>
+    </div>
+</div>

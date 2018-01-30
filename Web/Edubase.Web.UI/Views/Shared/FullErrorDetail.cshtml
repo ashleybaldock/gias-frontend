@@ -1,0 +1,57 @@
+﻿@model Exception
+@{
+    var isPartialView = ((bool?)ViewBag.IsPartialView).GetValueOrDefault();
+    Layout = isPartialView ? null as string : "../dfe/layouts/template.cshtml";
+    ViewBag.Title = "Get information about schools";
+    ViewBag.pageDescription = "";
+    ViewBag.pageClass = "error-page view-logs";
+}
+
+<div class="grid-row">
+    <div class="column-full">
+        @if (!isPartialView)
+        {
+            <div class="breadcrumbs">
+                <ul>
+                    <li>
+                        @Html.ActionLink("Home", "Index", "Search", new { area = "" }, null)
+                    </li>
+                </ul>
+
+            </div>
+        }
+        <h1 class="heading-xlarge">Sorry, something went wrong</h1>
+    </div>
+    <div class="column-full">
+        <p>Please try again later.</p>
+        <p>A report of the error has been sent to our technical team.</p>
+        @if (ViewBag.ErrorCode != null)
+        {
+            <p style="color:#ddd;">Error code: @ViewBag.ErrorCode</p>
+        }
+        <hr />
+        <h1 class="heading-medium">Details</h1>
+        <table>
+            <tr>
+                <td class="bold-xsmall" style="width:100px;">Message</td>
+                <td>@Model.Message</td>
+            </tr>
+            <tr>
+                <td class="bold-xsmall">Stack trace</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="plain">@FormatHelpers.HtmlizeNewLines(Model.ToString())</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:right;"><a href="/Admin/LogDetail/@ViewBag.ErrorCode" target="_blank">View full error report</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
+

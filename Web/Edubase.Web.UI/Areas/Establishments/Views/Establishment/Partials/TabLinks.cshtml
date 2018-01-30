@@ -1,0 +1,58 @@
+﻿@model EstablishmentDetailViewModel
+
+<div id="school-links" class="tab-content">
+    @if (Model.UserCanEdit)
+    {
+        <a href="@Url.RouteUrl("EditEstabLinks", new { id = Model.Establishment.Urn })" class="button button-grey mobile-full-width">Edit</a>
+        
+    }
+    
+    @if (Model.LinkedEstablishments.Any())
+    {
+        <p class="table-caption">
+            These establishments are linked with @Model.Establishment.Name,
+            URN: @Model.Establishment.Urn. For example, they may be predecessor or successor establishments.
+        </p>
+
+        <div class="table-count">
+            <p>Showing 1 - @Model.LinkedEstablishments.Count() of @Model.LinkedEstablishments.Count()</p>
+        </div>
+
+        <table class="edubase-table">
+            <thead>
+            <tr>
+                <th class="links-urn"><abbr title="Unique Reference Number">URN</abbr></th>
+                <th class="links-name">Establishment name</th>
+                <th class="links-type">Type of link</th>
+                <th class="links-date">Date linked</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var l in Model.LinkedEstablishments)
+            {
+                <tr>
+                    <td aria-label="URN">@Html.ActionLink(l.Urn.ToString(), "Details", new {id = l.Urn})</td>
+                    <td aria-label="Establishment name">@Html.ActionLink((l.EstablishmentName ?? "-"), "Details", new {id = l.Urn})</td>
+                    <td aria-label="Type of link">@l.LinkTypeName</td>
+                    <td aria-label="Date linked">@(l.LinkDate?.ToString("dd/MM/yyyy") ?? "None recorded")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        
+
+    }
+    else
+    {
+        <p>There are no linked establishments</p>
+    }
+    
+    @if (Model.UserCanEdit)
+    {
+        <div class="button-row">
+            <a href="@Url.RouteUrl("EditEstabLinks", new { id = Model.Establishment.Urn })" class="button button-grey mobile-full-width">Edit</a>
+        </div>
+        
+    }
+
+</div>

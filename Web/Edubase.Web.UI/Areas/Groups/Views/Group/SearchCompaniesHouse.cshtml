@@ -1,0 +1,105 @@
+﻿@model SearchCompaniesHouseModel
+@{
+    ViewBag.bodyClasses = "create-edit-school create-academy-trust";
+    ViewBag.hideLogo = true;
+    ViewBag.Title = "Create academy trust";
+}
+<div class="breadcrumbs">
+    <ul>
+        <li>
+            @Html.ActionLink("Home", "Index", "Search", new { area = "" }, null)
+        </li>
+        <li>
+            @Html.ActionLink("Tools", "Index", "Tools", new { area = "" }, null)
+        </li>
+    </ul>
+</div>
+
+
+@using (Html.BeginForm("SearchCompaniesHouse", "Group", FormMethod.Get))
+{ 
+    <div class="grid-row">
+        <div class="column-full">                      
+            <h1 class="heading-xlarge">Create an academy trust</h1>
+            <p>To create an academy trust record select the company record from Companies House.</p>
+
+            @Html.ValidationSummary(null, new { @class = "error-summary" })
+        </div>
+    </div>
+    <div class="grid-row">
+        <div class="column-two-thirds">
+            @if (string.IsNullOrWhiteSpace(Model.SearchText) && Request.Url.PathAndQuery.Contains("SearchText"))
+            {
+                <div class="warning-message">
+                    <p>Please enter a Companies House name or number to start a search</p>
+                </div>
+            }
+            else if (Model.NotFound)
+            {
+                <div class="warning-message">
+                    <p>We couldn't find any companies matching your search criteria</p>
+                </div>
+            }
+
+            <h2 class="heading-small">Add company</h2>
+            <div class="form-group inline-with-button">
+                @Html.LabelFor(x => x.SearchText, "Enter the Companies House name or number", new { @class = "form-label"})
+                @Html.TextBoxFor(x => x.SearchText, new {maxlength = 120, @class = "form-control "})
+                <button type="submit" class="button inline-submit">Find</button>
+            </div>
+
+        </div>
+    </div>
+
+    if (Model.Results != null && !Model.NotFound)
+    {
+       
+        if (Model.Results.PageCount > 1)
+        {
+            <div class="grid-row">
+                <div class="column-full top-pagination">
+                    @Html.Partial("_GenericPagination", Model)
+                </div>
+            </div>
+        }
+
+
+        if (Model.Results.Items.Any())
+        {
+            <div class="grid-row">
+                <div class="column-full">
+                    <table class="edubase-table company-details">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Companies House no.</th>
+                            <th>Incorporated</th>
+                            <th>Address</th>
+                        </tr>
+                        </thead>
+                        @foreach (var result in Model.Results.Items)
+                        {
+                            <tr class="company-result">
+                                <td aria-label="Name">@Html.ActionLink(result.Name, "CreateAcademyTrust", "Group", new { companiesHouseNumber = result.Number, area = "Groups" }, null)</td>
+                                <td aria-label="Companies House no."><a href="@System.Configuration.ConfigurationManager.AppSettings["CompaniesHouseBaseUrl"]@result.Number">@result.Number</a></td>
+                                <td aria-label="Incorporated">@(result.IncorporationDate?.ToString("dd/MM/yyyy"))</td>
+                                <td aria-label="Address">@(result.Address.ToString() ?? "Not recorded")</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        }
+
+        if (Model.Results.PageCount > 1)
+        {
+            <div class="grid-row">
+                <div class="column-full lower-pagination">
+                    @Html.Partial("_GenericPagination", Model)
+                </div>
+            </div>
+        }
+    }
+
+
+}

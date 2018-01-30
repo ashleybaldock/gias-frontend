@@ -1,0 +1,95 @@
+﻿@using Edubase.Common
+@using Edubase.Services.Enums
+@using VM = Edubase.Web.UI.Areas.Groups.Models.CreateEdit.IGroupPageViewModel;
+@model VM
+@{
+    ViewBag.bodyClasses = "school-details";
+    if(string.Equals(Model.SelectedTabName, "governance"))
+    {
+        ViewBag.bodyClasses = String.Concat("governance ", ViewBag.bodyClasses);
+
+    }
+    ViewBag.hideLogo = true;
+        Layout = "~/Views/Dfe/Layouts/template.cshtml";
+}
+
+<div class="breadcrumbs">
+    <ul>
+        <li>@Html.ActionLink("Home", "Index", "Search", new { area = "" })</li>
+    </ul>
+    
+</div>
+
+
+<h1 class="heading-large">@Model.GroupName</h1>
+
+<p class="urn">UID: @Model.GroupUId</p>
+<p class="establishment-type">@Model.GroupTypeName</p>
+@if (ViewData.ContainsKey("DuplicateGovernor"))
+{
+    @Html.Partial("~/Areas/Governors/Views/Governor/_DuplicateGovernor.cshtml", ViewData["DuplicateGovernor"])
+}
+
+@Html.ValidationSummary("Incorrect or missing details", new { @class = "error-summary" })
+
+<div class="grid-row">
+    <div class="column-full">
+        <div class="horizontal-tabs-wrapper">
+            <div class="tab-wrap">
+                <ul class="horizontal-tabs">
+                    <li>
+                        @if (string.Equals(Model.SelectedTabName, "details"))
+                        {
+                            <a href="@Url.Action("EditDetails", "Group", new { id = Model.GroupUId, area = "Groups" })" class="horizontal-tab selected-tab">Details</a>
+                        }
+                        else
+                        {
+                            <a href="@($"{Url.Action("Details", "Group", new {id = Model.GroupUId, area = "Groups"})}#details")" class="horizontal-tab">Details</a>
+                        }
+                    </li>
+                    @if (Model.GroupTypeId == (int)eLookupGroupType.MultiacademyTrust)
+                    {
+                        <li>
+                            @if (string.Equals(Model.SelectedTabName, "governance"))
+                            {
+                                <a href="@Url.Action("Edit", "Governor", new { groupUId = Model.GroupUId, area = "Governors" })" class="horizontal-tab selected-tab">Governance</a>
+                            }
+                            else
+                            {
+                                <a href="@($"{Url.Action("Details", "Group", new {id = Model.GroupUId, area = "Groups"})}#governance")" class="horizontal-tab @Html.Conditional(Model.SelectedTabName == "governance", "selected-tab")">Governance</a>
+                            }
+                        </li>
+                    }
+                    <li>
+                        @if (string.Equals(Model.SelectedTabName, "links"))
+                        {
+                            <a href="@Url.Action("EditLinks", "Group", new { id = Model.GroupUId, area = "Groups" })" class="horizontal-tab selected-tab">@Model.ListOfEstablishmentsPluralName.ToProperCase()</a>
+                        }
+                        else
+                        {
+                            <a href="@($"{Url.Action("Details", "Group", new {id = Model.GroupUId, area = "Groups"})}#list")" class="horizontal-tab">@Model.ListOfEstablishmentsPluralName.ToProperCase()</a>
+                        }
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content-wrapper horizontal-tabs-content">
+                @if (Model.SelectedTabName == "governance")
+                {
+                    <div class="tab-content">
+                        @RenderBody()
+                    </div>
+                }
+                else
+                {
+                    @RenderBody()
+                }
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@section ViewScripts
+{
+    @(RenderSection("ViewScripts", required: false))
+}
